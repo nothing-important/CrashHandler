@@ -1,5 +1,6 @@
 package com.example.administrator.androidcrashhandler;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Process;
@@ -11,24 +12,34 @@ import java.util.Locale;
 
 public class CrashActivity extends BaseActivity {
 
-    private TextView prompt;
+    private TextView prompt , crashMessage;
+    private String exceptionOfCrash;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crash);
+        initIntent();
         initView();
         countDownTimer.start();
     }
 
-    private void initView() {
-        prompt = findViewById(R.id.prompt);
+    private void initIntent() {
+        Intent intent = getIntent();
+        if (intent == null)return;
+        exceptionOfCrash = intent.getStringExtra("exceptionOfCrash");
     }
 
-    private CountDownTimer countDownTimer = new CountDownTimer(6000 , 1000) {
+    private void initView() {
+        prompt = findViewById(R.id.prompt);
+        crashMessage = findViewById(R.id.crashMessage);
+        crashMessage.setText(exceptionOfCrash);
+    }
+
+    private CountDownTimer countDownTimer = new CountDownTimer(10000 , 1000) {
         @Override
         public void onTick(long millisUntilFinished) {
-            prompt.setText(String.format(Locale.getDefault() , "程序出现错误，将在%1s秒内关闭" , millisUntilFinished/1000));
+            prompt.setText(String.format(Locale.getDefault() , "Warning!\nnuclear missile will be launched in %1s second" , millisUntilFinished/1000));
         }
 
         @Override

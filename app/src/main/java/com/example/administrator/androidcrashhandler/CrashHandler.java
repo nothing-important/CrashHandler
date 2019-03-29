@@ -2,6 +2,7 @@ package com.example.administrator.androidcrashhandler;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Looper;
 import android.os.Process;
 import android.widget.Toast;
 
@@ -10,13 +11,11 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
     private static volatile CrashHandler crashHandler;
 
     private Context context;
-    private Thread.UncaughtExceptionHandler defaultUncaughtExceptionHandler;
 
     private CrashHandler(){}
 
     public void init(Context context){
         this.context = context;
-        defaultUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(this);
     }
 
@@ -32,10 +31,19 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
     }
 
     @Override
-    public void uncaughtException(Thread t, Throwable e) {
+    public void uncaughtException(Thread t, final Throwable e) {
         // 提示信息
-        Intent intent = new Intent(context, CrashActivity.class);
-        context.startActivity(intent);
+        new Thread() {
+            @Override
+            public void run() {
+                Looper.prepare();
+                Intent intent = new Intent(context , CrashActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("exceptionOfCrash" , e.getMessage());
+                context.startActivity(intent);
+                Looper.loop();
+            }
+        }.start();
         ActivityCollector.finishAll();
         Process.killProcess(Process.myPid());
         System.exit(1);

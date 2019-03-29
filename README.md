@@ -1,0 +1,1 @@
+a crash handler to collection crash info
